@@ -16,18 +16,21 @@
 #include <vector>
 #include <iomanip>
 #include <typeinfo>
+#include <map>
 #include "LesData2.h"
 using namespace std;
 
-bool returnTrue(int antPass) {
-    return (antPass);
-}
-
 int main() {
 
-    int antPassasjerer = 10;
+    map <int, string> gMappen;
 
-    cout << (!returnTrue(antPassasjerer)) << endl;
+    for (int i = 0; i < 20; i++) {
+        gMappen[i] = "Heya";
+    }
+
+    for (const auto & val : gMappen) {
+        cout << val.first+1 << "\n";
+    }
 
 
     return 0;
