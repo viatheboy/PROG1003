@@ -21,17 +21,37 @@
 using namespace std;
 
 int main() {
+    int ønsketTall;
+    bool opptatt;
+    char romType;
+    float sum = 0;
+    int antallDager = 10;
+    int PRISENKELTROM = 1000;
+    bool frokost = true;
+    bool studentRabatt = true;
+    int STUDENTRABATTPROSENT = 40;
+    int PRISFROKOST = 150;
+    int PRISDOBBELTROM = 1500;
+    int PRISALLINCLUSIVE = 1200;
+    int PRISFILMPAKKE = 170;
+    bool allInclusive = true;
+    bool filmpakke = false;
 
-    map <int, string> gMappen;
-
-    for (int i = 0; i < 20; i++) {
-        gMappen[i] = "Heya";
-    }
-
-    for (const auto & val : gMappen) {
-        cout << val.first+1 << "\n";
-    }
-
+    cout << "Gjestens navn: " << "Preben" << ".\n"
+         << "Dobbeltrom\t- " << antallDager << " dager:\t" 
+         << PRISDOBBELTROM * antallDager << ",-\n";
+         sum += PRISDOBBELTROM * antallDager;
+        if (allInclusive) {
+            cout << "All inclusive\t- " << antallDager << " dager:\t" 
+                 << PRISALLINCLUSIVE * antallDager << ",-\n";
+            sum += allInclusive * antallDager;
+        }
+        if (filmpakke) {
+            cout << "Filmpakke\t- " << antallDager << " dager:\t" 
+                 << PRISFILMPAKKE * antallDager << ",-.\n";
+            sum += filmpakke * antallDager;   
+        }
+        cout << "Sum:\t\t\t\t" << fixed << setprecision(2) << sum << ",-\n";
 
     return 0;
 

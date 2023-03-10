@@ -56,7 +56,7 @@ class Hotellrom {
         virtual void lesData();
         virtual void skrivData() const = 0;  // Pure virtual - dvs. subklasser
         virtual void skrivHoveddata() const = 0; // MÅ lage disse funksjonene.
-        virtual void skrivTilFil(ofstream & ut) const;
+        virtual void skrivTilFil(ofstream & ut, int romNr) const;
 };
 
 
@@ -75,7 +75,7 @@ class Enkeltrom : public Hotellrom {
         virtual void lesData();
         virtual void skrivData() const;
         virtual void skrivHoveddata() const;
-        virtual void skrivTilFil(ofstream & ut) const;
+        virtual void skrivTilFil(ofstream & ut, int romNr) const;
 };
 
 
@@ -94,7 +94,7 @@ class Dobbeltrom : public Hotellrom {
         virtual void lesData();
         virtual void skrivData() const;
         virtual void skrivHoveddata() const;
-        virtual void skrivTilFil(ofstream & ut) const;
+        virtual void skrivTilFil(ofstream & ut, int romNr) const;
 };
 
 
@@ -146,6 +146,17 @@ int main() {
 Hotellrom::Hotellrom(ifstream & inn) {
     getline(inn, navn);
     inn >> antallDager;
+    inn.ignore(2);
+}
+
+
+/**
+ * Funksjon som leser inn alle datamedlemmene til baseklassen.
+ */
+void Hotellrom::lesData() {
+    cout << "Gjestens navn: ";
+    getline(cin, navn);
+    antallDager = lesInt("Antall dager", 1, 31);   // Setter grense på ≈1 mnd. per booking.
 }
 
 
@@ -154,8 +165,8 @@ Hotellrom::Hotellrom(ifstream & inn) {
  * 
  * @param   ut - Filobjektet datamedlemmene skrives til.
  */
-void Hotellrom::skrivTilFil(ofstream & ut) const {
-    ut << navn << " " << antallDager << "\n"; 
+void Hotellrom::skrivTilFil(ofstream & ut, int romNr) const {
+    ut << " " << romNr << " " << navn << " " << antallDager << " "; 
 }
 
 
@@ -167,6 +178,48 @@ void Hotellrom::skrivTilFil(ofstream & ut) const {
 Enkeltrom::Enkeltrom(ifstream & inn) : Hotellrom(inn) {
     inn >> frokost >> studentRabatt;
     inn.ignore(2);
+}
+
+
+/**
+ * Funksjon som leser inn alle subklassen og subklassens datamedlemmer.
+ * 
+ * @see     Hotellrom::lesData();
+ */
+void Enkeltrom::lesData() {
+    Hotellrom::lesData();
+    cout << "1 = Ja\n0 = Nei\n";
+    frokost         = lesInt("Frokost", 0, 1);
+    studentRabatt   = lesInt("Studentrabbat", 0, 1);
+}
+
+
+/**
+ * Funksjon som skriver ut samlet sum for et enkeltrom avhengig av om gjesten
+ * har bestilt frokost og har studentrabatt.
+ *  
+ * @see     Hotellrom::hentNavn()
+ */
+void Enkeltrom::skrivData() const {
+    float sum = 0;
+    cout << "Gjestens navn: " << Hotellrom::hentNavn() << ".\n"
+         << "Enkeltrom\t- " << antallDager << " Dager\t" 
+         << PRISENKELTROM * antallDager << ",-\n";
+         sum += PRISENKELTROM * antallDager;
+
+        if (frokost) {
+            cout << "Frokost\t\t- " << antallDager << " dager\t" 
+            << PRISFROKOST * antallDager << ",-\n";
+            sum += PRISFROKOST * antallDager;
+        }
+
+        if (studentRabatt) {
+            cout << "Studentrabatt:\t- " << antallDager << " dager\t-" 
+            << (sum*0.4) << ",-.\n";
+            sum = sum - (sum*0.4);
+        }
+
+        cout << "Sum: \t\t\t\t" << fixed << setprecision(2) << sum << ",-\n";
 }
 
 
@@ -191,10 +244,10 @@ void Enkeltrom::skrivHoveddata() const {
  * @param   ut - Filobjektet datamedlemmene skrives til.
  * @see     Hotellrom::skrivTilFil(...)
  */
-void Enkeltrom::skrivTilFil(ofstream & ut) const {
-    ut << 'E';                                      // Subklasse av typen 'E'
-    Hotellrom::skrivTilFil(ut);
-    ut << frokost << " " << studentRabatt << "\n";
+void Enkeltrom::skrivTilFil(ofstream & ut, int romNr) const {
+    ut << 'E' << " ";              // Subklasse av typen 'E'
+    Hotellrom::skrivTilFil(ut, romNr);
+    ut << " " << frokost << " " << studentRabatt << "\n";
 }
 
 
@@ -203,9 +256,48 @@ void Enkeltrom::skrivTilFil(ofstream & ut) const {
  * 
  * @param   inn - Filobjektet datamedlemmene leses fra.
  */
-Dobbeltrom::Dobbeltrom(ifstream & inn) : Dobbeltrom(inn) {
+Dobbeltrom::Dobbeltrom(ifstream & inn) : Hotellrom(inn) {
     inn >> allInclusive >> filmpakke;
     inn.ignore(2);
+}
+
+
+/**
+ * Funksjon som leser inn alle subklassen og subklassens datamedlemmer.
+ * 
+ * @see     Hotellrom::lesData();
+ */
+void Dobbeltrom::lesData() {
+    Hotellrom::lesData();
+    cout << "1 = Ja\n0 = Nei\n";
+    allInclusive    = lesInt("All inclusive", 0, 1);
+    filmpakke       = lesInt("Filmpakke", 0, 1); 
+}
+
+
+/**
+ * Funksjon som skriver ut samlet sum for et dobbeltrom avhengig av om gjesten
+ * har bestilt all inclusive og/eller filmpakke.
+ *  
+ * @see     Hotellrom::hentNavn()
+ */
+void Dobbeltrom::skrivData() const {
+    float sum = 0;
+    cout << "Gjestens navn: " << Hotellrom::hentNavn() << ".\n"
+         << "Dobbeltrom\t- " << antallDager << " dager:\t" 
+         << PRISDOBBELTROM * antallDager << ",-\n";
+         sum += PRISDOBBELTROM * antallDager;
+        if (allInclusive) {
+            cout << "All inclusive\t- " << antallDager << " dager:\t" 
+                 << PRISALLINCLUSIVE * antallDager << ",-\n";
+            sum += allInclusive * antallDager;
+        }
+        if (filmpakke) {
+            cout << "Filmpakke\t- " << antallDager << " dager:\t" 
+                 << PRISFILMPAKKE * antallDager << ",-.\n";
+            sum += filmpakke * antallDager;   
+        }
+        cout << "Sum:\t\t\t\t" << fixed << setprecision(2) << sum << ",-\n";
 }
 
 
@@ -230,9 +322,9 @@ void Dobbeltrom::skrivHoveddata() const {
  * @param   ut - Filobjektet datamedlemmene skrives til.
  * @see     Hotellrom::skrivTilFil(...)
  */
-void Dobbeltrom::skrivTilFil(ofstream & ut) const {
-    ut << "D";                                      // Subklasse av typen 'D'
-    Hotellrom::skrivTilFil(ut);
+void Dobbeltrom::skrivTilFil(ofstream & ut, int romNr) const {
+    ut << "D";                       // Subklasse av typen 'D'
+    Hotellrom::skrivTilFil(ut, romNr);
     ut << allInclusive << " " << filmpakke << "\n";
 }
 
@@ -247,9 +339,8 @@ void lesFraFil() {
 
     if (innfil) {
         cout << "Leser inn fra 'HOTEL.txt'\n";
-        innfil >> romType >> romNr;
+        innfil >> romType >> romNr; innfil.ignore();
         while (!innfil.eof()) {
-            innfil.ignore(2);
             switch(romType) {
                 case 'E': gHotellRommene[romNr] = new Enkeltrom(innfil);    break;
                 case 'D': gHotellRommene[romNr] = new Dobbeltrom(innfil);   break;
@@ -270,10 +361,10 @@ void lesFraFil() {
  * @see     virtual Hotellrom::skrivTilFil(...)
  */
 void skrivTilFil() {
-    ofstream utfil("HOTEL.txt");     // .txt grunnet MacOS
+    ofstream utfil("HOTEL.txt");        // .txt grunnet MacOS
     cout << "Skriver til filen 'HOTEL.txt'.\n";
     for (const auto & val : gHotellRommene) {
-        val.second->skrivTilFil(utfil);
+        val.second->skrivTilFil(utfil, val.first);
     }
     utfil.close();
 }
@@ -285,10 +376,10 @@ void skrivTilFil() {
 void skrivMeny() {
     cout << "Vennligst velg et alternativ: \n"
          << "S - Skriv alle rommene\n"
-         << "B - Book et rom"
-         << "F - Se data om et rom"
-         << "U - Sjekk ut"
-         << ": ";
+         << "B - Book et rom\n"
+         << "F - Se data om et rom\n"
+         << "U - Sjekk ut\n\n"
+         << "Q - Avslutt\n";
 }
 
 
@@ -312,13 +403,12 @@ void skrivBookedeRomnumre() {
  * samt om det er enkeltrom/dobbeltrom, og hvilke tjenester/fordeler som knyttes til rommet.
  * 
  * @see     Hotellrom::hentNavn()
- * @see     Enkeltrom::skrivHoveddata()
- * @see     Dobbeltrom::skrivHoveddata()
+ * @see     virtual Hotellrom::skrivHoveddata()
  */
 void skrivAlleRommene() {
     if (gHotellRommene.size() > 0) {
         for (const auto & val : gHotellRommene) {
-            cout << "Navn: " << val.second->hentNavn() << "\n";
+            cout << "\nNavn: " << val.second->hentNavn() << "\n";
             val.second->skrivHoveddata();
         }
     } else {
@@ -328,9 +418,75 @@ void skrivAlleRommene() {
 
 
 /**
- * @brief 
+ * Funksjon som booker nytt rom. Spør etter øsnket rom og undersøker om rommet er opptatt.
+ * Funksjonen skiller mellom booking av enkeltrom og dobbeltrom. 
  * 
+ * @see     skrivBookedeRomnumre()
+ * @see     virtual Hotellrom::lesData()
  */
 void bookRom() {
-    
+    int onsketRom;
+    char romType;
+    bool opptatt = false;
+    Hotellrom* hotellrom = nullptr;
+    skrivBookedeRomnumre();
+
+    // Sjekker om ønsket rom er opptatt.
+    onsketRom = lesInt("Les inn ønsket rom", LAVESTEROMNR, HOYESTEROMNR);
+    for (const auto & val : gHotellRommene) {
+        if (onsketRom == val.first) {
+            opptatt = true;
+        }
+    }
+    if (!opptatt) {
+        do {     // Sørger for at enten 'E eller 'D' skrives inn.
+            romType = lesChar("Romtype");
+        } while ((romType != 'E') && (romType != 'D'));
+
+        switch (romType) {
+            case 'E': hotellrom = new Enkeltrom;    break;
+            case 'D': hotellrom = new Dobbeltrom;   break;
+            default: cout << "Finnes ingen rom med denne betegnelsen.\n";
+        }
+        hotellrom->lesData();
+        gHotellRommene[onsketRom] = hotellrom;
+    } else {
+        cout << onsketRom << " er allerede booket.\n";
+    }
+}
+
+
+/**
+ * Funksjon som tar inn et ønsket rom og sjekker om dette rommet er booket.
+ * Er det booket vil funksjonen skrive ut fakture til dette rommet. 
+ * Om gjesten sjekker ut fra rommet vil rommet fjernes fra listen av bookede rom. 
+ * 
+ * @see     skrivBookedeRomnumre()
+ * @see     virtual Hotellrom::skrivData()
+ */
+void rom(const romOperasjon sDsU) {
+    int onsketRom;
+    bool finnes = false;
+    Hotellrom* hotellrommet = nullptr;
+    skrivBookedeRomnumre();
+
+    // Leser inn og sjekker om rommet finnes i listen.
+    onsketRom = lesInt("Ønsket rom", LAVESTEROMNR, HOYESTEROMNR);
+    for (const auto & val : gHotellRommene) {
+        if (onsketRom == val.first) {
+            finnes = true;
+            hotellrommet = val.second;
+        }
+    }
+
+    if (finnes) {
+        hotellrommet->skrivData();
+        if (sDsU == sjekkUt) {
+            delete hotellrommet;
+            gHotellRommene.erase(onsketRom);
+        }
+    } else {
+        cout << "Finner ikke rom " << onsketRom << ".\n";
+    }
+
 }
