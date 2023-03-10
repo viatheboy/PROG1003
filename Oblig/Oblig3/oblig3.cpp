@@ -325,3 +325,12 @@ void skrivAlleRommene() {
         cout << "Finnes ingen bookede rom.\n";
     }
 }
+
+
+/**
+ * @brief 
+ * 
+ */
+void bookRom() {
+    
+}
