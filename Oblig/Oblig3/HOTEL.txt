@@ -1,2 +1,15 @@
-D 111 Pelle 23 1 1
-E 222 Bror 22  1 1
+D 111 Pelle 
+23
+1 1
+E 198 Geir Oddvar
+8
+1 0
+D 199 Per Ivar
+18
+1 0
+E 222 Svetlana
+9
+1 1
+E 645 Hore Ronny
+14
+1 1

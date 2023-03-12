@@ -1,16 +1,18 @@
 /**
- *  Starten på oblig nr 3 - Hotellrombookinger.
+ * Obligatorisk Oppgave 3
+ * Program som holder oversikt over et hotells rom, hvorav rom er booket eller ikke. 
+ * Programmet benytter seg av en hotellrom baseklasse, med to subklasser enkelt- og 
+ * dobbeltrom. Programmet leser inn bookede hotellrom fra filen ('HOTEL.txt') når 
+ * programmet starter, og lagrer bookede rom på samme fil når programmet avsluttes.
+ * 
+ * .txt fil-extension er benyttet fordi programemt er skrevet og kjører på MacOS. 
+ * 
  *
- *  Programmet:
- *    - skriver ut på skjermen:
- *          - alle hotellets bookede rom
- *          - status/fakturaen for ett gitt rom
- *    - sjekker en gjest inn/ut
- *    - leser/skriver hele datastrukturen fra/til fil
- *
- *  @file OBLIG3.CPP
+ *  @file Oblig3.cpp
  *  @author  av den innledende/startende koden: 
  *           Malin Foss,  Markus Olsvik,  Øystein Qvigstad  &  FrodeH, NTNU
+ * 
+ *  @author Steffen S. Martinsen
  */
 
 
@@ -146,7 +148,7 @@ int main() {
 Hotellrom::Hotellrom(ifstream & inn) {
     getline(inn, navn);
     inn >> antallDager;
-    inn.ignore(2);
+    inn.ignore();
 }
 
 
@@ -166,7 +168,7 @@ void Hotellrom::lesData() {
  * @param   ut - Filobjektet datamedlemmene skrives til.
  */
 void Hotellrom::skrivTilFil(ofstream & ut, int romNr) const {
-    ut << " " << romNr << " " << navn << " " << antallDager << " "; 
+    ut << " " << romNr << " " << navn << "\n" << antallDager << "\n"; 
 }
 
 
@@ -177,7 +179,7 @@ void Hotellrom::skrivTilFil(ofstream & ut, int romNr) const {
  */
 Enkeltrom::Enkeltrom(ifstream & inn) : Hotellrom(inn) {
     inn >> frokost >> studentRabatt;
-    inn.ignore(2);
+    inn.ignore();
 }
 
 
@@ -228,13 +230,9 @@ void Enkeltrom::skrivData() const {
  * det om det er true. 
  */
 void Enkeltrom::skrivHoveddata() const {
-    cout << "Enkeltrom\n";
-    if (frokost) {
-        cout << "Frokost\n";
-    }
-    if (studentRabatt) {
-        cout << "Studentrabatt\n";
-    }
+                        cout << "Enkeltrom\n";
+    if (frokost)        cout << "Frokost\n";
+    if (studentRabatt)  cout << "Studentrabatt\n";
 }
 
 
@@ -245,9 +243,9 @@ void Enkeltrom::skrivHoveddata() const {
  * @see     Hotellrom::skrivTilFil(...)
  */
 void Enkeltrom::skrivTilFil(ofstream & ut, int romNr) const {
-    ut << 'E' << " ";              // Subklasse av typen 'E'
+    ut << 'E';              // Subklasse av typen 'E'
     Hotellrom::skrivTilFil(ut, romNr);
-    ut << " " << frokost << " " << studentRabatt << "\n";
+    ut  << frokost << " " << studentRabatt << "\n";
 }
 
 
@@ -258,7 +256,7 @@ void Enkeltrom::skrivTilFil(ofstream & ut, int romNr) const {
  */
 Dobbeltrom::Dobbeltrom(ifstream & inn) : Hotellrom(inn) {
     inn >> allInclusive >> filmpakke;
-    inn.ignore(2);
+    inn.ignore();
 }
 
 
@@ -306,13 +304,9 @@ void Dobbeltrom::skrivData() const {
  * skriver ut dette om det er true.
  */
 void Dobbeltrom::skrivHoveddata() const {
-    cout << "Dobbeltrom\n";
-    if (allInclusive) {
-        cout << "All Inclusive\n";
-    }
-    if (filmpakke) {
-        cout << "Filmpakke\n";
-    }
+                        cout << "Dobbeltrom\n";
+    if (allInclusive)   cout << "All Inclusive\n";
+    if (filmpakke)      cout << "Filmpakke\n";
 }
 
 
@@ -320,7 +314,7 @@ void Dobbeltrom::skrivHoveddata() const {
  * Funksjon som skriver alle baseklassen og klassens datamedlemmer til fil.
  * 
  * @param   ut - Filobjektet datamedlemmene skrives til.
- * @see     Hotellrom::skrivTilFil(...)
+ * @see          Hotellrom::skrivTilFil(...)
  */
 void Dobbeltrom::skrivTilFil(ofstream & ut, int romNr) const {
     ut << "D";                       // Subklasse av typen 'D'
@@ -339,7 +333,8 @@ void lesFraFil() {
 
     if (innfil) {
         cout << "Leser inn fra 'HOTEL.txt'\n";
-        innfil >> romType >> romNr; innfil.ignore();
+        innfil >> romType >> romNr; 
+        innfil.ignore();
         while (!innfil.eof()) {
             switch(romType) {
                 case 'E': gHotellRommene[romNr] = new Enkeltrom(innfil);    break;
@@ -347,6 +342,7 @@ void lesFraFil() {
                 default: cout << "Finner ikke romtypen.\n";
             }
             innfil >> romType >> romNr;
+            innfil.ignore();
         }
         innfil.close();
     } else {
@@ -440,7 +436,7 @@ void bookRom() {
     }
     if (!opptatt) {
         do {     // Sørger for at enten 'E eller 'D' skrives inn.
-            romType = lesChar("Romtype");
+            romType = lesChar("Romtype ((E)nkel/(D)obbel)");
         } while ((romType != 'E') && (romType != 'D'));
 
         switch (romType) {
